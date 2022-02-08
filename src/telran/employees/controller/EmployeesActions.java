@@ -36,6 +36,11 @@ public class EmployeesActions {
 	
 	
 	private static Long getID(InputOutput io) {
+		/* V.R.
+		 *  Negative values are generally unacceptable for IDs.
+		 *  IDs consist of the same number of digits (9 for Israel ID).
+		 *  Your way doesn't support these requirements 
+		 */
 		return io.readLong("Enter ID");
 	}
 	private static String getName(InputOutput io) {
@@ -89,6 +94,11 @@ public class EmployeesActions {
 	}
 	
 	private static void writeResult(InputOutput io, ArrayList<Employee> employees) {
+		/* V.R.
+		 * All of employees will be printed in the same line.
+		 * It is very uncomfortable. Each of employees has to be printed 
+		 * in the separated line.
+		 */
 		if(!employees.isEmpty()) {
 			io.writeObjectLine("Required: " + employees);
 		}else {
@@ -103,6 +113,9 @@ public class EmployeesActions {
 	}
 	
 	private static Iterable<Employee> getEmployeesByAge(InputOutput io) {
+		/* V.R.
+		 * If min age is more than max age, then exception will be thrown.
+		 */
 		int[] ages = new int[] {
 				io.readInt("Enter minimum age"), io.readInt("Enter maximum age")
 		};
@@ -112,6 +125,9 @@ public class EmployeesActions {
 	}
 	
 	private static Iterable<Employee> getEmployeesBySalary(InputOutput io) {
+		/* V.R.
+		 * If min salary is more than max salary, then exception will be thrown.
+		 */
 		int[] salaries = new int[] {
 				io.readInt("Enter minimum salary"), io.readInt("Enter maximum salary")
 		};
@@ -127,6 +143,9 @@ public class EmployeesActions {
 	}
 	
 	private static Iterable<Employee> getEmployeesByDepartmentAndSalary(InputOutput io) {
+		/* V.R.
+		 * If min salary is more than max salary, then exception will be thrown.
+		 */
 		int[] salaries = new int[] {
 				io.readInt("Enter minimum salary"), io.readInt("Enter maximum salary")
 		};
