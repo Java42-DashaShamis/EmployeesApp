@@ -79,10 +79,9 @@ class EmployeesMethodsTest {
 
 	@Test
 	void testGetAllEmployees() {
-		List<Employee>expected = Arrays.asList(empl1, empl2, empl3, empl4, empl5, empl6);
-		employees.getAllEmployees().forEach(e -> assertTrue(expected.contains(e)));
+		employees.getAllEmployees().forEach(e -> assertTrue(employeesList.contains(e)));
 		List<Employee> listEmployees = (List)employees.getAllEmployees();  
-		assertEquals(expected.size(), listEmployees.size());
+		assertEquals(employeesList.size(), listEmployees.size());
 	}
 
 	@Test

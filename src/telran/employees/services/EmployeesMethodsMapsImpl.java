@@ -2,6 +2,7 @@ package telran.employees.services;
 
 import java.time.LocalDate;
 import java.time.temporal.ChronoUnit;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.LinkedList;
@@ -40,8 +41,7 @@ public class EmployeesMethodsMapsImpl implements EmployeesMethods {
 		if(!mapEmployees.containsKey(id)) {
 			return ReturnCode.EMPLOYEE_NOT_FOUND;
 		}
-		Employee empl = mapEmployees.get(id);
-		mapEmployees.remove(id);
+		Employee empl = mapEmployees.remove(id);
 		removeFromEmployeesAge(empl);
 		removeFromEmployeesSalary(empl);
 		removeFromEmployeesDepartment(empl);
@@ -76,9 +76,21 @@ public class EmployeesMethodsMapsImpl implements EmployeesMethods {
 
 	@Override
 	public Iterable<Employee> getAllEmployees() {
-		List<Employee> employees = new LinkedList<Employee>(mapEmployees.values());
-		return employees;
+		
+		return copyEmployees(mapEmployees.values());
 	}
+
+	private Iterable<Employee> copyEmployees(Collection<Employee> employees) {
+		
+		return employees.stream()
+				.map(empl -> copyOneEmployee(empl))
+				.collect(Collectors.toList());
+	}
+
+	private Employee copyOneEmployee(Employee empl) {
+		return new Employee(empl.id, empl.name, empl.birthDate, empl.salary, empl.department);
+	}
+
 
 	@Override
 	public Employee getEmployee(long id) {
@@ -139,9 +151,9 @@ public class EmployeesMethodsMapsImpl implements EmployeesMethods {
 			return ReturnCode.SALARY_NOT_UPDATE;
 		}
 		
-		removeEmployee(empl.id);
+		removeFromEmployeesSalary(empl);
 		empl.salary = newSalary;
-		addEmployee(empl);
+		employeesSalary.computeIfAbsent(empl.salary, k -> new LinkedList<Employee>()).add(empl);
 		return  ReturnCode.OK;
 	}
 	
@@ -154,9 +166,9 @@ public class EmployeesMethodsMapsImpl implements EmployeesMethods {
 		if(empl.department == newDepartment) {
 			return ReturnCode.DEPARTMENT_NOT_UPDATED;
 		}
-		removeEmployee(empl.id);
+		removeFromEmployeesDepartment(empl);
 		empl.department = newDepartment;
-		addEmployee(empl);
+		employeesDepartment.computeIfAbsent(empl.department, k -> new LinkedList<Employee>()).add(empl);
 		return  ReturnCode.OK;
 	}
 

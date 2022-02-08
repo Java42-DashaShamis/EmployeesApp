@@ -34,5 +34,10 @@ public class Employee {
 		Employee other = (Employee) obj;
 		return id == other.id;
 	}
+	@Override
+	public String toString() {
+		return "Employee [id=" + id + ", name=" + name + ", birthDate=" + birthDate + ", salary=" + salary
+				+ ", department=" + department + "]";
+	}
 	
 }

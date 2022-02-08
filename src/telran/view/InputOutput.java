@@ -43,6 +43,10 @@ public interface InputOutput {
 	String errorOptions = "There is no such option";
 	String errorLocalDate = "It is wrong format of date";
 	
+	default Double readDouble(String prompt) {
+		return readObject(prompt, errorNumber, Double::parseDouble);
+	}
+	
 	default Integer readInt(String prompt) {
 		return readObject(prompt, errorNumber ,str -> Integer.parseInt(str));
 	}
@@ -51,18 +55,13 @@ public interface InputOutput {
 		return checkRange(prompt, min, max);
 	}
 	private Integer checkRange(String prompt, int min, int max) {
-		while(true) {
-			Integer num = readInt(prompt);
-			try {
-				if(num >= min && num <= max) {
-					return num;
-				}else {
-					throw new IllegalArgumentException();
-				}
-			} catch (Exception e) {
-				writeObjectLine(errorRange);
+		return readObject(prompt, String.format("No number in the range [%d-%d]",min,max), str -> {
+			int res = Integer.parseInt(str);
+			if (res < min || res > max) {
+				throw new IllegalArgumentException();
 			}
-		}
+			return res;
+		});
 	}
 	
 	default Long readLong(String prompt) {
@@ -70,16 +69,11 @@ public interface InputOutput {
 	}
 	
 	default String readStringOption(String prompt, Set<String>options) {
-		return readObject(prompt, errorOptions, str -> {
-			if(options.contains(str)) {
-				return str;
-			}
-			throw new IllegalArgumentException();
-		});
+		return readStringPredicate(prompt, errorOptions, options::contains);
 	}
 	
 	default LocalDate readDate(String prompt) {
-		return readObject(prompt, errorLocalDate, str -> LocalDate.parse(str));
+		return readObject(prompt, errorLocalDate, LocalDate::parse);
 	}
 	
 	default LocalDate readDate(String prompt, DateTimeFormatter formatter) {
