@@ -1,156 +1,134 @@
 package telran.employees.controller;
 
 import java.time.LocalDate;
-import java.time.format.DateTimeFormatter;
-import java.util.ArrayList;
-import java.util.HashSet;
+import java.util.*;
 
 import telran.employees.dto.Employee;
-import telran.employees.services.EmployeesMethodsMapsImpl;
-import telran.employees.services.ReturnCode;
-import telran.view.InputOutput;
-import telran.view.Item;
-
+import telran.employees.services.EmployeesMethods;
+import telran.view.*;
 public class EmployeesActions {
-	private static EmployeesMethodsMapsImpl emp;
-	private static HashSet<String> departmentOptions;
-	private EmployeesActions(){
+private static final int MIN_SALARY = 5000;
+private static final int MAX_SALARY = 40000;
+private static final int MIN_AGE = 18;
+private static final int MAX_AGE = 70;
+private static EmployeesMethods employees;
+private static ArrayList<Item> items;
+private static Set<String> departments;
+private EmployeesActions() {
+	
+}
+public static ArrayList<Item> getActionItems(EmployeesMethods employees, Set<String> departments) {
+	EmployeesActions.employees = employees;
+	EmployeesActions.departments = departments;
+	if (items == null) {
+		items = new ArrayList<>(Arrays.asList(new Item[] {
+			Item.of("Hiring new Employee", EmployeesActions::hireEmployee)	,
+			Item.of("Firing Employee ", EmployeesActions::fireEmployee )	,
+			Item.of("Updating salary", EmployeesActions::updateSalary)	,
+			Item.of("Updating department", EmployeesActions::updateDepartment)	,
+			Item.of("Display Employee Info", EmployeesActions::displayEmployee)	,
+			Item.of("Display Employees Info filtered by Age", EmployeesActions::displayEmployeesAge)	,
+			Item.of("Display Employees Info filtered by Salary", EmployeesActions::displayEmployeesSalary)	,
+			Item.of("Display Employees Info of Department", EmployeesActions::displayEmployeesDepartment)	,
+			Item.of("Display Employees Info filtered by Salary and Department", EmployeesActions::displayEmployeesSalaryDepartment)	,
+			Item.of("Display Employees Info", EmployeesActions::displayEmployees),
+			Item.exit()
+			
+		})) ;
+		
+	}
+	return items;
+}
+private static void hireEmployee(InputOutput io) {
+	long id = getId(io, true);
+	String name = getName(io);
+	
+	LocalDate birthdate = getBirthDate(io);
+	int salary = getSalary(io);
+	String department = getDepartment(io);
+	Employee empl = new Employee(id, name, birthdate , salary , department );
+	io.writeObjectLine(employees.addEmployee(empl));
+}
+private static String getDepartment(InputOutput io) {
+	
+	return io.readStringOption("Enter department " + departments, departments);
+}
+private static int getSalary(InputOutput io) {
+	
+	return io.readInt("Enter salary", MIN_SALARY, MAX_SALARY);
+}
+private static LocalDate getBirthDate(InputOutput io) {
+	
+	return io.readDate("Enter birthdate in the yyyy-MM-dd format");
+}
+private static String getName(InputOutput io) {
+	
+	return  io.readStringPredicate("Enter name", "Name may contain only letters with first capital",
+			str -> str.matches("[A-Z][a-z]+"));
+}
+private static long getId(InputOutput io, boolean flHire) {
+	long idRes = Long.parseLong(io.readStringPredicate("Enter Employee's ID", "Wrong ID input", str -> str.matches("\\d{9}")));
+	Employee empl = employees.getEmployee(idRes);
+	if(empl != null && flHire) {
+		throw new RuntimeException(String.format("Employee with id %d already exists", idRes));
+	}
+	if(empl == null && !flHire) {
+		throw new RuntimeException(String.format("Employee with id %d not found", idRes));
+	}
+	return idRes;
+}
+private static void fireEmployee(InputOutput io) {
+	long id = getId(io, false);
+	io.writeObjectLine(employees.removeEmployee(id));
+}
+private static void updateSalary(InputOutput io) {
+	long id = getId(io, false);
+	int salary = getSalary(io);
+	io.writeObjectLine(employees.updateSalary(id, salary));
+}
+private static void updateDepartment(InputOutput io) {
+	long id = getId(io, false);
+	String department = getDepartment(io);
+	io.writeObjectLine(employees.updateDepartment(id, department));
+}
+private static void displayEmployee(InputOutput io) {
+	long id = getId(io, false);
+	Employee empl = employees.getEmployee(id);
+	io.writeObjectLine(empl);
+}
+private static void displayEmployeesAge(InputOutput io) {
+	int fromTo[] = getFromTo(io, "Age", MIN_AGE, MAX_AGE);
+	employeesOutput(io, employees.getEmployeesByAge(fromTo[0], fromTo[1]));
+}
+private static void employeesOutput(InputOutput io, Iterable<Employee> employeesIterable) {
+	boolean isNotEmpty = employeesIterable.iterator().hasNext();
+	if (!isNotEmpty) {
+		io.writeObjectLine("No Employees found");
+	} else {
+		employeesIterable.forEach(io::writeObjectLine);
 	}
 	
-	public static ArrayList<Item> getEmployeesItems(EmployeesMethodsMapsImpl emp, HashSet<String> departmentOptions){
-		EmployeesActions.emp = emp;
-		EmployeesActions.departmentOptions = departmentOptions;
-		ArrayList<Item> items = new ArrayList<>();
-		items.add(Item.of("Add Employee", EmployeesActions::addEmployee));
-		items.add(Item.of("Remove Employee", EmployeesActions::removeEmployee));
-		items.add(Item.of("Get Employee", EmployeesActions::getEmployee));
-		items.add(Item.of("Get all Employees", EmployeesActions::getAllEmployees));
-		items.add(Item.of("Get Employees by Age", EmployeesActions::getEmployeesByAge));
-		items.add(Item.of("Get Employees by Salary", EmployeesActions::getEmployeesBySalary));
-		items.add(Item.of("Get Employees by Department", EmployeesActions::getEmployeesByDepartment));
-		items.add(Item.of("Get Employees by Department and Salary", EmployeesActions::getEmployeesByDepartmentAndSalary));
-		items.add(Item.of("Update Salary", EmployeesActions::updateSalary));
-		items.add(Item.of("Update Department", EmployeesActions::updateDepartment));
-		return items;
-	}
 	
-	
-	private static Long getID(InputOutput io) {
-		return io.readLong("Enter ID");
-	}
-	private static String getName(InputOutput io) {
-		return io.readStringPredicate("Enter name using only letters with capital first letter", "There are not only letters with capital first letter", str -> str.matches("[a-zA-Z]+") && Character.isUpperCase(str.charAt(0)));
-	}
-	private static LocalDate getBirthDate(InputOutput io) {
-		return io.readDate("Enter date of birth as dd/MM/yyyy", DateTimeFormatter.ofPattern("dd/MM/yyyy"));
-	}
-	private static int getSalary(InputOutput io) {
-		return io.readInt("Enter salary from 0 to 1000000", 0, 1000000);
-	}
-	private static String getDepartment(InputOutput io, HashSet<String> options) {
-		return io.readStringOption("Enter department" + options.toString(), options );
-	}
-	
-	private static Employee getEmployeeFromInput(InputOutput io) {
-		Long ID = getID(io);
-		String name = getName(io);
-		LocalDate birthDate = getBirthDate(io);
-		int salary = getSalary(io);
-		String department = getDepartment(io, departmentOptions);
-		return new Employee(ID,name,birthDate,salary,department);
-	}
-	
-	private static void addEmployee(InputOutput io) {
-		Employee employee = getEmployeeFromInput(io);
-		if(ReturnCode.OK == emp.addEmployee(employee)) {
-			io.writeObjectLine("Added: " + employee);
-		}else {
-			io.writeObjectLine("Addition failed");
-		}
-	}
-	
-	private static void removeEmployee(InputOutput io) {
-		Employee employee = getEmployee(io);
-		if(employee!=null && ReturnCode.OK == emp.removeEmployee(employee.id)) {
-			io.writeObjectLine("Removed: " + employee);
-		}else {
-			io.writeObjectLine("Remove failed");
-		}
-	}
-	
-	private static Employee getEmployee(InputOutput io) {
-		Employee employee = emp.getEmployee(getID(io));
-		if(employee != null) {
-			io.writeObjectLine("Required: " + employee);
-		}else {
-			io.writeObjectLine("No employee is found by this ID");
-		}
-		return employee;
-	}
-	
-	private static void writeResult(InputOutput io, ArrayList<Employee> employees) {
-		if(!employees.isEmpty()) {
-			io.writeObjectLine("Required: " + employees);
-		}else {
-			io.writeObjectLine("No employees are found");
-		}
-	}
-	
-	private static Iterable<Employee> getAllEmployees(InputOutput io) {
-		ArrayList<Employee> employees = (ArrayList<Employee>) emp.getAllEmployees();
-		writeResult(io,employees);
-		return employees;
-	}
-	
-	private static Iterable<Employee> getEmployeesByAge(InputOutput io) {
-		int[] ages = new int[] {
-				io.readInt("Enter minimum age"), io.readInt("Enter maximum age")
-		};
-		ArrayList<Employee> employees = (ArrayList<Employee>) emp.getEmployeesByAge(ages[0], ages[1]);
-		writeResult(io,employees);
-		return employees;
-	}
-	
-	private static Iterable<Employee> getEmployeesBySalary(InputOutput io) {
-		int[] salaries = new int[] {
-				io.readInt("Enter minimum salary"), io.readInt("Enter maximum salary")
-		};
-		ArrayList<Employee> employees = (ArrayList<Employee>) emp.getEmployeesByAge(salaries[0], salaries[1]);
-		writeResult(io,employees);
-		return employees;
-	}
-	
-	private static Iterable<Employee> getEmployeesByDepartment(InputOutput io) {
-		ArrayList<Employee> employees = (ArrayList<Employee>) emp.getEmployeesByDepartment(getDepartment(io, departmentOptions));
-		writeResult(io,employees);
-		return employees;
-	}
-	
-	private static Iterable<Employee> getEmployeesByDepartmentAndSalary(InputOutput io) {
-		int[] salaries = new int[] {
-				io.readInt("Enter minimum salary"), io.readInt("Enter maximum salary")
-		};
-		ArrayList<Employee> employees = (ArrayList<Employee>) emp.getEmployeesByDepartmentAndSalary(getDepartment(io, departmentOptions), salaries[0], salaries[1]);
-		writeResult(io,employees);
-		return employees;
-	}
-	
-	private static void update(InputOutput io, Employee employee, ReturnCode code) {
-		if(employee!=null && ReturnCode.OK == code) {
-			io.writeObjectLine("Updated: " + emp.getEmployee(employee.id));
-		}else {
-			io.writeObjectLine("Update is failed");
-		}
-	}
-	
-	private static void updateSalary(InputOutput io) {
-		Employee employee = getEmployee(io);
-		update(io, employee, emp.updateSalary(employee.id, io.readInt("Enter new salary")));
-	}
-	
-	private static void updateDepartment(InputOutput io) {
-		Employee employee = getEmployee(io);
-		update(io, employee, emp.updateDepartment(getID(io), io.readStringOption("Enter new department" + departmentOptions.toString(), departmentOptions)));
-	}
-
+}
+private static int[] getFromTo(InputOutput io, String type, int min, int max) {
+	int from = io.readInt(String.format("Enter %s value from", type), min, max);
+	int to = io.readInt(String.format("Enter %s value to", type), from + 1, max);
+	return new int[] {from, to};
+}
+private static void displayEmployeesSalary(InputOutput io) {
+	int fromTo[] = getFromTo(io, "Salary", MIN_SALARY, MAX_SALARY);
+	employeesOutput(io, employees.getEmployeesBySalary(fromTo[0], fromTo[1]));
+}
+private static void displayEmployeesDepartment(InputOutput io) {
+	String department = getDepartment(io);
+	employeesOutput(io, employees.getEmployeesByDepartment(department));
+}
+private static void displayEmployeesSalaryDepartment(InputOutput io) {
+	String department = getDepartment(io);
+	int fromTo[] = getFromTo(io, "salary", MIN_SALARY, MAX_SALARY);
+	employeesOutput(io, employees.getEmployeesByDepartmentAndSalary(department, fromTo[0], fromTo[1]));
+}
+private static void displayEmployees(InputOutput io) {
+	employeesOutput(io, employees.getAllEmployees());
+}
 }
