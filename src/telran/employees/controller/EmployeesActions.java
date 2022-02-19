@@ -32,7 +32,7 @@ public static ArrayList<Item> getActionItems(EmployeesMethods employees, Set<Str
 			Item.of("Display Employees Info of Department", EmployeesActions::displayEmployeesDepartment)	,
 			Item.of("Display Employees Info filtered by Salary and Department", EmployeesActions::displayEmployeesSalaryDepartment)	,
 			Item.of("Display Employees Info", EmployeesActions::displayEmployees),
-			Item.exit()
+			Item.exit() //TODO exit and save
 			
 		})) ;
 		

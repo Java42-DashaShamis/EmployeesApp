@@ -14,6 +14,13 @@ import java.util.stream.Collectors;
 import telran.employees.dto.Employee;
 
 public class EmployeesMethodsMapsImpl implements EmployeesMethods {
+	
+	private transient String fileName;
+	private static final long serialVersionUID = 1L;
+	public EmployeesMethodsMapsImpl(String fileName) {
+		this.fileName=fileName;
+	}
+	
 	private HashMap<Long, Employee> mapEmployees = new HashMap<>(); //key - id, value - employee
 	private TreeMap<Integer, List<Employee>> employeesAge = new TreeMap<>();//key - age, value - list of empl
 	private TreeMap<Integer, List<Employee>> employeesSalary = new TreeMap<>();//key - salary, value - list of empl
@@ -170,6 +177,18 @@ public class EmployeesMethodsMapsImpl implements EmployeesMethods {
 		empl.department = newDepartment;
 		employeesDepartment.computeIfAbsent(empl.department, k -> new LinkedList<Employee>()).add(empl);
 		return  ReturnCode.OK;
+	}
+
+	@Override
+	public void restore() {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void save() {
+		// TODO Auto-generated method stub
+		
 	}
 
 }

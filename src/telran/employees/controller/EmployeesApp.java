@@ -15,13 +15,28 @@ public class EmployeesApp {
 	public static void main(String[] args) {
 		InputOutput io = new ConsoleInputOutput();
 		
-		EmployeesMethodsMapsImpl emp = new EmployeesMethodsMapsImpl();
+		if(args.length < 1) {
+			io.writeObjectLine("Usage argument should contain configuration file name");
+			return;
+		}
+		//Configuration file contains text like employeesDataFile = employees.data
+		//Apply BufferedReader for reading configuration
+		String fileName = getFileName(args[0]);
+		
+		EmployeesMethodsMapsImpl emp = new EmployeesMethodsMapsImpl(fileName);
+		emp.restore();
+		
 		HashSet<String> options = new HashSet<String>(Arrays.asList("culture", "sport", "economics", "health", "defence"));
-		ArrayList<Item> items = EmployeesActions.getEmployeesItems(emp, options);
+		ArrayList<Item> items = EmployeesActions.getActionItems(emp, options);
 		items.add(Item.exit());
 		
 		Menu menu = new Menu("Employees", items);
 		menu.perform(io);
+	}
+
+	private static String getFileName(String configFile) {
+		// TODO Auto-generated method stub
+		return null;
 	}
 
 }
