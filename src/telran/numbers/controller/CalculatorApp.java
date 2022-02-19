@@ -5,13 +5,14 @@ import telran.view.ConsoleInputOutput;
 import java.util.ArrayList;
 
 import telran.numbers.service.Calculator;
+import telran.numbers.service.CalculatorImpl;
 import telran.view.*;
 
 public class CalculatorApp {
 
 	public static void main(String[] args) {
 		InputOutput io = new ConsoleInputOutput();
-		Calculator calculator = new Calculator();
+		Calculator calculator = new CalculatorImpl();
 		ArrayList<Item> items = CalculatorActions.getCalculatorItems(calculator);
 		items.add(Item.exit());
 		
