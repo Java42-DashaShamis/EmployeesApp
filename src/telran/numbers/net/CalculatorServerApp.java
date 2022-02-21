@@ -1,4 +1,4 @@
-package telran.net;
+package telran.numbers.net;
 
 import java.net.*;
 

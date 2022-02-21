@@ -1,4 +1,4 @@
-package telran.net;
+package telran.numbers.net;
 
 import java.io.BufferedReader;
 import java.io.IOException;
