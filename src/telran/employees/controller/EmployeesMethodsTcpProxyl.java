@@ -78,5 +78,24 @@ public class EmployeesMethodsTcpProxyl implements EmployeesMethods {
 	public void save() {
 		sender.send(SAVE, "");
 	}
+/* V.R. The following stack appears in case of "11" selection in menu
+ * Try to understand why it is happened and what is necessary to do
+ * to prevent it.
+java.net.SocketException: Connection reset
+	at java.base/sun.nio.ch.NioSocketImpl.implRead(NioSocketImpl.java:323)
+	at java.base/sun.nio.ch.NioSocketImpl.read(NioSocketImpl.java:350)
+	at java.base/sun.nio.ch.NioSocketImpl$1.read(NioSocketImpl.java:803)
+	at java.base/java.net.Socket$SocketInputStream.read(Socket.java:966)
+	at java.base/java.net.Socket$SocketInputStream.read(Socket.java:961)
+	at java.base/java.io.ObjectInputStream$PeekInputStream.peek(ObjectInputStream.java:2853)
+	at java.base/java.io.ObjectInputStream$BlockDataInputStream.peek(ObjectInputStream.java:3180)
+	at java.base/java.io.ObjectInputStream$BlockDataInputStream.peekByte(ObjectInputStream.java:3190)
+	at java.base/java.io.ObjectInputStream.readObject0(ObjectInputStream.java:1693)
+	at java.base/java.io.ObjectInputStream.readObject(ObjectInputStream.java:514)
+	at java.base/java.io.ObjectInputStream.readObject(ObjectInputStream.java:472)
+	at telran.net.TcpClientServer.run(TcpClientServer.java:27)
+	at telran.net.TcpServer.run(TcpServer.java:26)
+	at telran.employees.net.EmployeesAppServer.main(EmployeesAppServer.java:12)
 
+ */
 }
